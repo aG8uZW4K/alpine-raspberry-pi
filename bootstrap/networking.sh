@@ -1,20 +1,25 @@
 #!/bin/sh
 
+if [ -e $(dirname $0)/.env ]; then
+	source $(dirname $0)/.env
+fi
+
 set -xe
 
-apk add wpa_supplicant wireless-tools wireless-regdb iw
-sed -i 's/wpa_supplicant_args=\"/wpa_supplicant_args=\" -u -Dwext,nl80211/' /etc/conf.d/wpa_supplicant
+if [ -e "/etc/conf.d/wpa_supplicant" ]; then
+	sed -i 's/wpa_supplicant_args=\"/wpa_supplicant_args=\" -u -Dwext,nl80211/' /etc/conf.d/wpa_supplicant
 
-echo -e 'brcmfmac' >> /etc/modules
+	echo -e 'brcmfmac' >> /etc/modules
 
 cat <<EOF > /boot/wpa_supplicant.conf
-network={
+	network={
  ssid="SSID"
  psk="PASSWORD"
 }
 EOF
 
-ln -s /boot/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+	ln -s /boot/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant.conf
+fi
 
 cat <<EOF > /etc/network/interfaces
 auto lo
@@ -27,12 +32,8 @@ auto wlan0
 iface wlan0 inet dhcp
   up iwconfig wlan0 power off
   
-hostname raspberrypi  
 EOF
 
-# avahi
-apk add dbus avahi
-
-# bluetooth
-apk add bluez bluez-deprecated
-sed -i '/bcm43xx/s/^#//' /etc/mdev.conf
+if [ "$SOFTWARE_SYSTEM" =~ "bluez" ] || [ "$SOFTWARE_ADDITIONAL" =~ "bluez" ]; then
+	sed -i '/bcm43xx/s/^#//' /etc/mdev.conf
+fi

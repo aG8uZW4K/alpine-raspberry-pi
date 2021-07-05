@@ -1,23 +1,40 @@
 #!/bin/sh
 
+if [ -e $(dirname $0)/.env ]; then
+	source $(dirname $0)/.env
+fi
+
 set -xe
 
-TARGET_HOSTNAME="raspberrypi"
-TARGET_TIMEZONE="Europe/Madrid"
-ROOT_PASS=raspberry
 
 # base stuff
-apk add ca-certificates
 update-ca-certificates
-echo "root:$ROOT_PASS" | chpasswd
-setup-hostname $TARGET_HOSTNAME
-echo "127.0.0.1    $TARGET_HOSTNAME $TARGET_HOSTNAME.localdomain" > /etc/hosts
-setup-keymap es es
+
+ROOT_PWD=$(openssl rand -base64 30)
+echo "root:${ROOT_PWD}" | chpasswd
+
+if [ -z "${SYSTEM_HOST_NAME}" ]; then
+	SYSTEM_HOST_NAME="unkown"
+fi
+setup-hostname $SYSTEM_HOST_NAME
+echo "127.0.0.1    $SYSTEM_HOST_NAME $SYSTEM_HOST_NAME.localdomain" > /etc/hosts
+
+if [ -z "${SYSTEM_KEYMAP}" ]; then
+
+	setup-keymap us us-euro
+else
+	setup-keymap ${SYSTEM_KEYMAP}
+fi
 
 # time
 apk add chrony tzdata
-setup-timezone -z $TARGET_TIMEZONE
+if [ -z "${SYSTEM_TIME_ZONE}" ]; then
+	setup-timezone -z UTC
+else
+	setup-timezone -z ${SYSTEM_TIME_ZONE}
+fi
 
 # other stuff
-apk add nano htop curl wget bash bash-completion findutils
-sed -i 's/\/bin\/ash/\/bin\/bash/g' /etc/passwd
+if [ "$SOFTWARE_SYSTEM" =~ "bash" ] || [ "$SOFTWARE_ADDITIONAL" =~ "bash" ]; then
+	sed -i 's/\/bin\/ash/\/bin\/bash/g' /etc/passwd
+fi

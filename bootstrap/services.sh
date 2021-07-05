@@ -1,8 +1,10 @@
 #!/bin/sh
 
-set -xe
+if [ -e $(dirname $0)/.env ]; then
+	source $(dirname $0)/.env
+fi
 
-apk add openssh haveged
+set -xe
 
 for service in devfs dmesg mdev; do
 	rc-update add $service sysinit
@@ -13,6 +15,11 @@ for service in modules sysctl hostname bootmisc swclock syslog swap; do
 done
 
 for service in dbus haveged sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli; do
+	if [ "$service" == "bluetooth" ]; then
+		if [ "$SOFTWARE_SYSTEM" =~ "bluez" ] || [ "$SOFTWARE_ADDITIONAL" =~ "bluez" ]; then
+			rc-update add $service default
+		fi
+	fi
 	rc-update add $service default
 done
 

@@ -1,8 +1,10 @@
 #!/bin/sh
 
-set -xe
+if [ -e $(dirname $0)/.env ]; then
+	source $(dirname $0)/.env
+fi
 
-apk add dosfstools e2fsprogs-extra parted
+set -xe
 
 cat <<EOF > /usr/bin/first-boot
 #!/bin/sh

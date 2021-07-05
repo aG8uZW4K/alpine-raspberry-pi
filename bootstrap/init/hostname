@@ -1,0 +1,33 @@
+#!/sbin/openrc-run
+
+description="Sets the hostname of the machine."
+
+depend() {
+        keyword -prefix -lxc -docker
+}
+
+genHostname() {
+        for i in $(ifconfig -a | grep HWaddr | sed -e 's/  */;/g' | cut -d';' -f 5); do
+                i=$(echo $i | sed -e 's/://g');
+                NAME=$NAME$i;
+        done
+        echo $NAME > /etc/hostname
+
+}
+
+
+start() {
+        if [ -s /etc/hostname ] ; then
+                opts="-F /etc/hostname"
+                if [ "unkown" = $(cat /etc/hostname) ]; then
+                        genHostname
+                fi
+        else
+                genHostname
+                opts="-F /etc/hostname"
+        fi
+        ebegin "Setting hostname"
+        hostname $opts
+        eend $?
+}
+
