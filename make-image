@@ -53,7 +53,7 @@ cp -R bootstrap/ /alpine/
 
 
 if [ -n $CONSOLETTYENABLED  ]; then
-	sed -i 's/%CONSOLETTY%/console='${CONSOLETTY}'/' /alpine/bootstrap/kernel.sh
+	sed -i 's/%CONSOLETTY%/console='${CONSOLETTY},115200'/' /alpine/bootstrap/kernel.sh
 	sed -i 's/%BOOTUSERCFG%/enable_uart=1/' /alpine/bootstrap/kernel.sh
 else
 	sed -i 's/%BOOTUSERCFG%//g' /alpine/bootstrap/kernel.sh
