@@ -1,3 +1,8 @@
-dist
-bootstrap/.env
+*
+*/
+!.gitignore
+!README.md
+!bootstrap_rpi_alpine_aarch64.sh
+!make-image
+!bootstrap/**
 
