@@ -26,15 +26,15 @@ USER_FIRST_USER_PWD="raspberry"
 
 if [ -n "${USER_FIRST_USER_SSHPUBKEY}" ] || [ -n "${USER_FIRST_USER_SSHPUBKEY_BASE64}" ]; then
 	
-	FIRST_USER_PWD=$(openssl rand -base64 20)
+	USER_FIRST_USER_PWD=$(openssl rand -base64 20)
 	mkdir -p /home/${USER_FIRST_USER_USERNAME}/.ssh
-	if []; then
-		echo "${FIRST_USER_SSH}" > /home/${USER_FIRST_USER_USERNAME}/.ssh/authorized_keys
+	if [ -n "${USER_FIRST_USER_SSHPUBKEY}" ]; then
+		echo "${USER_FIRST_USER_SSHPUBKEY}" > /home/${USER_FIRST_USER_USERNAME}/.ssh/authorized_keys
 	fi
 	if [ -n "${USER_FIRST_USER_SSHPUBKEY_BASE64}" ]; then
 		echo $USER_FIRST_USER_SSHPUBKEY_BASE64 | base64 -d >> /home/${USER_FIRST_USER_USERNAME}/.ssh/authorized_keys
 	fi
-	echo "${FIRST_USER_PWD}" > /home/${USER_FIRST_USER_USERNAME}/password
+	echo "${USER_FIRST_USER_PWD}" > /home/${USER_FIRST_USER_USERNAME}/password
 	chmod -R 750 /home/${USER_FIRST_USER_USERNAME}
 	chmod 644 /home/${USER_FIRST_USER_USERNAME}/.ssh/authorized_keys
 	chmod 600 /home/${USER_FIRST_USER_USERNAME}/password

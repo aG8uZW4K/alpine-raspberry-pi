@@ -7,22 +7,32 @@ fi
 set -xe
 
 for service in devfs dmesg mdev; do
-	rc-update add $service sysinit
+	if [ -e /etc/init.d/$service ]; then
+		rc-update add $service sysinit
+	fi
 done
 
 for service in modules sysctl hostname bootmisc swclock syslog swap; do
-	rc-update add $service boot
+    if [ -e /etc/init.d/$service ]; then
+		rc-update add $service boot
+	fi
 done
 
-for service in dbus haveged sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli; do
+for service in dbus haveged sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli udev-trigger udev; do
 	if [ "$service" == "bluetooth" ]; then
 		if [ "$SOFTWARE_SYSTEM" =~ "bluez" ] || [ "$SOFTWARE_ADDITIONAL" =~ "bluez" ]; then
-			rc-update add $service default
+			if [ -e /etc/init.d/$service ]; then
+				rc-update add $service default
+			fi
 		fi
 	fi
-	rc-update add $service default
+	if [ -e /etc/init.d/$service ]; then
+		rc-update add $service default
+	fi
 done
 
 for service in mount-ro killprocs savecache; do
-	rc-update add $service shutdown
+    if [ -e /etc/init.d/$service ]; then
+		rc-update add $service shutdown
+	fi
 done
